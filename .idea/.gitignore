@@ -2,4 +2,20 @@
 /shelf/
 /workspace.xml
 # Editor-based HTTP Client requests
+# Cartelle di configurazione di IntelliJ (personali)
+.idea/
+*.iml
+*.iws
+
+# Cartelle di compilazione (i file .class generati non servono su GitHub)
+out/
+target/
+build/
+bin/
+
+# File di sistema del Mac (visto che usi Mac)
+.DS_Store
+
+# Log ed errori
+*.log
 /httpRequests/
