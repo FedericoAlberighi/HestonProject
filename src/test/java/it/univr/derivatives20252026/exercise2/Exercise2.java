@@ -17,6 +17,9 @@ import net.finmath.modelling.descriptor.HestonModelDescriptor;
 
 public class Exercise2 {
 
+    /**
+     * Demonstrates variance swap pricing via analytic and replication methods
+     */
     public static void main(String[] args) throws Exception {
 
         System.out.println("--- ESERCIZIO 2: Variance Swap Pricing (Heston vs Replica) ---");
