@@ -30,7 +30,7 @@ public class Exercise2 {
         // =======================================================================
         System.out.println("\n1. Calibrazione sui dati di mercato reali...");
 
-        LocalDate calibrationDate = LocalDate.of(2010, 1, 7);
+        LocalDate calibrationDate = LocalDate.of(2010, 5, 10);
         OptionSurfaceData marketData = MarketDataProvider.getVolatilityDataContainer().get(calibrationDate);
 
         if(marketData == null) {
@@ -39,9 +39,9 @@ public class Exercise2 {
 
         // Initial guess
         double[] guess = new double[] {
-                0.0423, // volatility (sqrt(V0))
+                0.0323, // volatility (sqrt(V0))
                 0.0818, // theta
-                0.8455, // kappa
+                1.0, // kappa
                 0.4639, // xi (nu)
                 -0.4    // rho
         };
@@ -110,7 +110,7 @@ public class Exercise2 {
                 maturity,
                 forwardPrice,
                 discountFactor,
-                300 // numero punti
+                1000 // numero punti
         );
 
         // 3. Calcoliamo il valore dell'integrale (Somma Pesata Opzioni)

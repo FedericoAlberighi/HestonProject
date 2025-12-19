@@ -50,7 +50,7 @@ public class HestonCalibrationClass {
             new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 5.0));
 
     private static final ScalarParameterInformationImplementation xiInfo =
-            new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 1.0));
+            new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 2.0));
 
     private static final ScalarParameterInformationImplementation rhoInfo =
             new ScalarParameterInformationImplementation(true, new BoundConstraint(-1.0, 1.0));
@@ -118,7 +118,7 @@ public class HestonCalibrationClass {
         EuropeanOptionSmileByCarrMadan pricer = new EuropeanOptionSmileByCarrMadan(maturity, strikes);
 
         // 5. Configurazione del Problema di Calibrazione (CalibratedModel)
-        double[] parameterStep = new double[] { 0.01, 0.01, 0.01, 0.01, 0.01 }; // Step per le derivate numeriche
+        double[] parameterStep = new double[] { 0.001, 0.001, 0.001, 0.001, 0.001 }; // Step per le derivate numeriche
 
         CalibratedModel calibrationProblem = new CalibratedModel(
                 marketData,       // Target (Prezzi/Volatilità di mercato)
