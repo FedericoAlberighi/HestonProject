@@ -102,7 +102,7 @@ public class CarrMadanGenericIntegrator {
 
         // Integrale Call: dal Forward fino a molto OTM (400% Forward)
         TrapezoidalRealIntegrator callsIntegrator = new TrapezoidalRealIntegrator(
-                forwardPrice * 1.01, // Partiamo appena sopra il forward
+                forwardPrice*1.0001 , // Partiamo appena sopra il forward
                 forwardPrice * 4.0,
                 numberOfPoints
         );

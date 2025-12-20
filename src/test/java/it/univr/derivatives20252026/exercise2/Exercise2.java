@@ -30,7 +30,7 @@ public class Exercise2 {
         // =======================================================================
         System.out.println("\n1. Calibrazione sui dati di mercato reali...");
 
-        LocalDate calibrationDate = LocalDate.of(2010, 5, 10);
+        LocalDate calibrationDate = LocalDate.of(2010, 01, 07);
         OptionSurfaceData marketData = MarketDataProvider.getVolatilityDataContainer().get(calibrationDate);
 
         if(marketData == null) {
