@@ -16,84 +16,133 @@ import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
 import net.finmath.optimizer.SolverException;
 
 /**
- * <p><strong>Classe di utilità per la Calibrazione del Modello di Heston.</strong></p>
- * * <p>Questa classe incapsula la complessità della configurazione di Finmath per l'ottimizzazione
- * dei parametri del modello stocastico di volatilità.</p>
- * * <p>Il processo di calibrazione cerca di minimizzare la differenza tra i prezzi delle opzioni
- * osservati sul mercato (Superficie di Volatilità) e quelli teorici generati dal modello
- * tramite il metodo FFT di Carr-Madan.</p>
+ * Utility class for Heston Model Calibration.
+ * <p>
+ * This class acts as a wrapper to configure and execute the optimization of stochastic
+ * volatility parameters using the <i>finmath-lib</i> library.
+ * </p>
+ * <p>
+ * The process relies on minimizing the Root Mean Squared Error (RMSE) between:
+ * <ul>
+ * <li>Market prices (or implied volatilities) provided by {@link OptionSurfaceData}.</li>
+ * <li>Theoretical prices calculated via the Carr-Madan FFT method.</li>
+ * </ul>
+ * </p>
  *
  * @author Federico Alberighi
  * @author Alice Bonizzoni
- * @version 1.0
+ * @version 1.1
  */
 public class HestonCalibrationClass {
 
-    /* * ===========================================================================
-     * VINCOLI SUI PARAMETRI (PARAMETER BOUNDS)
+    /* ===========================================================================
+     * PARAMETER BOUNDS
      * ===========================================================================
      */
 
+    /**
+     * Constraint for parameter <b>Sigma</b> (Initial Volatility).
+     * <br>Represents the square root of the instantaneous variance at time t=0.
+     * <br>Allowed range: [0.01 - 1.0] (1% to 100%)
+     */
     private static final ScalarParameterInformationImplementation volatilityInfo =
             new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 1.0));
 
+    /**
+     * Constraint for parameter <b>Theta</b> (Long Run Variance).
+     * <br>Represents the long-term mean level to which variance reverts.
+     * <br>Allowed range: [0.01 - 0.20]
+     */
     private static final ScalarParameterInformationImplementation thetaInfo =
             new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 0.2));
 
     /**
-     * Vincolo per Kappa (Mean Reversion Speed).
-     * Velocità con cui la varianza torna verso Theta.
-     * Range: [0.01 - 5.0].
-     * Nota: Il limite superiore è stato esteso a 5.0 rispetto allo standard 1.0
+     * Constraint for parameter <b>Kappa</b> (Mean Reversion Speed).
+     * <br>Determines the speed at which variance reverts to the Theta level.
+     * <br>Allowed range: [0.01 - 5.0].
+     * <p>Note: A higher value implies a faster reversion to the mean.</p>
      */
     private static final ScalarParameterInformationImplementation kappaInfo =
             new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 5.0));
 
+    /**
+     * Constraint for parameter <b>Xi</b> (Volatility of Volatility).
+     * <br>Determines the "volatility" (standard deviation) of the stochastic variance process.
+     * <br>Allowed range: [0.01 - 2.0]
+     */
     private static final ScalarParameterInformationImplementation xiInfo =
             new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 2.0));
 
+    /**
+     * Constraint for parameter <b>Rho</b> (Correlation).
+     * <br>Correlation between the asset price Brownian motion and the variance Brownian motion.
+     * <br>Allowed range: [-1.0 - 1.0]
+     * <p>Note: For equity markets, negative values are generally expected (leverage effect).</p>
+     */
     private static final ScalarParameterInformationImplementation rhoInfo =
             new ScalarParameterInformationImplementation(true, new BoundConstraint(-1.0, 1.0));
 
 
-    // Factory per l'algoritmo di ottimizzazione (Levenberg-Marquardt)
+    /**
+     * Factory for creating the optimization algorithm.
+     * The Levenberg-Marquardt algorithm is used, which is particularly suitable
+     * for non-linear least squares problems.
+     */
     private final OptimizerFactory optimizerFactory;
 
     /**
-     * Costruttore: Inizializza il motore di ottimizzazione.
-     * Utilizza l'algoritmo di Levenberg-Marquardt
+     * Constructor for the calibration class.
+     * <p>
+     * Initializes the {@link OptimizerFactoryLevenbergMarquardt} with default parameters:
+     * <ul>
+     * <li>Max Iterations: 300</li>
+     * <li>Number of Threads: 2 (for parallel computation)</li>
+     * </ul>
+     * </p>
      */
     public HestonCalibrationClass() {
-        // Configuriamo l'ottimizzatore con 300 iterazioni massime e 4 thread paralleli
-        this.optimizerFactory = new OptimizerFactoryLevenbergMarquardt(300, 4);
+        this.optimizerFactory = new OptimizerFactoryLevenbergMarquardt(300, 2);
     }
 
     /**
-     * Esegue la procedura di calibrazione per una specifica data di mercato.
-     * * @param date La data di riferimento per la calibrazione (Valuation Date).
-     * @param marketData Il contenitore dei dati di mercato (Discount Curve, Forward Curve, Superficie Volatilità).
-     * @param initialParameters Array di 5 double contenente il "guess" iniziale {vol, theta, kappa, xi, rho}.
-     * * @return OptimizationResult Un oggetto contenente:
-     * <ul>
-     * <li>Il modello calibrato (con i parametri ottimali).</li>
-     * <li>L'errore finale (RMSE).</li>
-     * <li>Il numero di iterazioni impiegate.</li>
-     * </ul>
-     * @throws SolverException Se l'algoritmo di ottimizzazione fallisce.
+     * Performs Heston model calibration for a specific valuation date.
+     * <p>The method executes the following steps:</p>
+     * <ol>
+     * <li>Extracts discount and forward curves from market data.</li>
+     * <li>Constructs a {@link HestonModelDescriptor} using the initial guess parameters.</li>
+     * <li>Initializes the {@link CalibratableHestonModel} applying the defined bounds.</li>
+     * <li>Configures the FFT Pricer (Carr-Madan) on a standard maturity (e.g., 1 year).</li>
+     * <li>Runs the optimization to minimize the distance between model and market prices.</li>
+     * </ol>
+     *
+     * @param date
+     * The valuation date for which calibration is performed.
+     * @param marketData
+     * {@link OptionSurfaceData} object containing the volatility surface and yield curves.
+     * @param initialParameters
+     * Array of 5 doubles containing the initial guess in the following order:
+     * {@code {sigma, theta, kappa, xi, rho}}.
+     *
+     * @return {@link OptimizationResult}
+     * Object containing the calibrated model, the residual error (RMSE), and the iteration count.
+     *
+     * @throws SolverException
+     * If the optimization algorithm fails to converge or encounters numerical errors.
      */
     public OptimizationResult calibrate(LocalDate date, OptionSurfaceData marketData, double[] initialParameters) throws SolverException {
 
-        // 1. Estrazione Curve e Spot iniziale dai dati di mercato
+        // 1. Extract Curves and Initial Spot from market data
         DiscountCurve discountCurve = marketData.getDiscountCurve();
         DiscountCurve equityForwardCurve = marketData.getEquityForwardCurve();
         double initialValue = equityForwardCurve.getValue(0.0);
 
-        // 2. Creazione del Descrittore del Modello (HestonModelDescriptor)
+        // 2. Create Model Descriptor (HestonModelDescriptor)
+        // This object acts as a "snapshot" of the model parameters at a given time.
         HestonModelDescriptor hestonDescriptor = new HestonModelDescriptor(
                 date,
                 initialValue,
                 discountCurve,
-                discountCurve,       // Usiamo la stessa curva per discount e drift (ipotesi r=d)
+                discountCurve,        // Assumption: drift curve = discount curve (r = d)
                 initialParameters[0], // volatility (sigma)
                 initialParameters[1], // theta
                 initialParameters[2], // kappa
@@ -101,7 +150,8 @@ public class HestonCalibrationClass {
                 initialParameters[4]  // rho
         );
 
-        // 3. Creazione del Modello Calibrabile (CalibratableHestonModel)
+        // 3. Create Calibratable Model
+        // Binds the descriptor to the statically defined constraints.
         CalibratableHestonModel model = new CalibratableHestonModel(
                 hestonDescriptor,
                 volatilityInfo,
@@ -109,27 +159,29 @@ public class HestonCalibrationClass {
                 kappaInfo,
                 xiInfo,
                 rhoInfo,
-                false // applyParameterConstraintsToInitialParameter (false = permette guess leggermente fuori bound se necessario)
+                false // applyParameterConstraintsToInitialParameter: false allows the guess to slightly violate initial bounds
         );
 
-        // 4. Configurazione del Pricer FFT (Carr-Madan)
+        // 4. Configure FFT Pricer (Carr-Madan)
+        // We use 1-year options from the market smile as the primary calibration target.
         double maturity = 1.0;
         double[] strikes = marketData.getSmile(maturity).getStrikes();
         EuropeanOptionSmileByCarrMadan pricer = new EuropeanOptionSmileByCarrMadan(maturity, strikes);
 
-        // 5. Configurazione del Problema di Calibrazione (CalibratedModel)
-        double[] parameterStep = new double[] { 0.01, 0.01, 0.01, 0.01, 0.01 }; // Step per le derivate numeriche
+        // 5. Configure Calibration Problem
+        // Defines the "step" for numerical derivative calculations (sensitivity) during optimization.
+        double[] parameterStep = new double[] { 0.01, 0.01, 0.01, 0.01, 0.01 };
 
         CalibratedModel calibrationProblem = new CalibratedModel(
-                marketData,       // Target (Prezzi/Volatilità di mercato)
-                model,            // Modello da calibrare
-                optimizerFactory, // Algoritmo (Levenberg-Marquardt)
-                pricer,           // Funzione di pricing
-                initialParameters,// Punto di partenza
-                parameterStep     // Sensibilità parametri
+                marketData,       // Target (Market data to fit)
+                model,            // Mathematical model
+                optimizerFactory, // Optimization engine
+                pricer,           // Objective function (Analytic Pricer)
+                initialParameters,// Starting point in parameter space
+                parameterStep     // Step size for numerical gradients
         );
 
-        // 6. Esecuzione dell'Ottimizzazione
+        // 6. Execute Optimization and return results
         return calibrationProblem.getCalibration();
     }
 }

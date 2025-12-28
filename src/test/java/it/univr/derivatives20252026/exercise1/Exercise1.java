@@ -12,60 +12,68 @@ import net.finmath.marketdata.model.volatilities.OptionSurfaceData;
 import net.finmath.modelling.descriptor.HestonModelDescriptor;
 
 /**
- * <p><strong>Esercizio 1: Model Risk e Ricalibrazione Storica.</strong></p>
- * * Questa classe implementa l'analisi di stabilità dei parametri del modello di Heston
- * attraverso una procedura di calibrazione giornaliera (Rolling Calibration).
- * * <p>L'obiettivo è osservare come i 5 parametri del modello (<tt>sigma, theta, kappa, xi, rho</tt>)
- * evolvono nel tempo per adattarsi alle nuove superfici di volatilità di mercato.</p>
- * * <p>La classe utilizza un approccio <b>Sequenziale (Bootstrapping)</b>: i parametri ottimali
- * calibrati al giorno <i>t</i> vengono utilizzati come <i>Initial Guess</i> per la calibrazione
- * del giorno <i>t+1</i>. Questo garantisce una maggiore continuità e riduce il rischio
- * di cadere in minimi locali distanti tra un giorno e l'altro.</p>
- * * @author Alice Bonizzoni
- * *@author Federico Alberighi
- * @version 1.0
+ * <p><strong>Exercise 1: Model Risk and Historical Recalibration.</strong></p>
+ * <p>
+ * This class implements the stability analysis of the Heston model parameters through a
+ * daily calibration procedure (Rolling Calibration).
+ * </p>
+ * <p>
+ * The goal is to observe how the 5 model parameters (<tt>sigma, theta, kappa, xi, rho</tt>)
+ * evolve over time to adapt to new market volatility surfaces.
+ * </p>
+ * <p>
+ * The class uses a <b>Sequential Approach (Bootstrapping)</b>: the optimal parameters
+ * calibrated at day <i>t</i> are used as the <i>Initial Guess</i> for the calibration
+ * at day <i>t+1</i>. This ensures greater continuity and reduces the risk of the optimizer
+ * falling into distant local minima between consecutive days.
+ * </p>
+ *
+ * @author Federico Alberighi
+ * @author Alice Bonizzoni
+ * @version 1.1
  */
 public class Exercise1 {
 
     /**
-     * Punto di ingresso dell'applicazione.
-     * <p>Il workflow è il seguente:</p>
+     * Application entry point.
+     * <p>The workflow is as follows:</p>
      * <ol>
-     * <li>Caricamento delle superfici di volatilità storiche (da file Excel/CSV).</li>
-     * <li>Inizializzazione delle serie storiche (TimeSeries) per il salvataggio dei risultati.</li>
-     * <li>Definizione dei parametri di partenza (Guess iniziale).</li>
-     * <li>Esecuzione del loop giornaliero di calibrazione (con aggiornamento sequenziale).</li>
-     * <li>Generazione dei grafici finali.</li>
+     * <li>Loading historical volatility surfaces (from Excel/CSV).</li>
+     * <li>Initialization of TimeSeries to store the results.</li>
+     * <li>Definition of starting parameters (Initial Guess).</li>
+     * <li>Execution of the daily calibration loop (with sequential update).</li>
+     * <li>Generation of final plots.</li>
      * </ol>
-     * * @param args Argomenti da riga di comando (non utilizzati in questo esercizio).
-     * @throws Exception Se si verificano errori durante il caricamento dei dati o l'ottimizzazione.
+     *
+     * @param args Command line arguments (not used in this exercise).
+     * @throws Exception If errors occur during data loading or optimization.
      */
     public static void main(String[] args) throws Exception {
 
         // =======================================================================
-        // 1. CARICAMENTO DATI DI MERCATO
+        // 1. MARKET DATA LOADING
         // =======================================================================
-        System.out.println("Caricamento dati di mercato...");
+        System.out.println("Loading market data...");
 
-        // TreeMap ordinata per data contenente le superfici di volatilità (Smile/Skew)
+        // TreeMap sorted by date containing volatility surfaces (Smile/Skew)
         TreeMap<LocalDate, OptionSurfaceData> marketData = MarketDataProvider.getVolatilityDataContainer();
         Set<LocalDate> keys = marketData.keySet();
 
         // =======================================================================
-        // 2. PREPARAZIONE STRUTTURE DATI
+        // 2. DATA STRUCTURES PREPARATION
         // =======================================================================
 
-        // Inizializzazione delle TimeSeries per tracciare l'evoluzione di ogni parametro
-        TimeSeries volatilityTimeSeries = new TimeSeries(); // Sigma (volatilità spot)
-        TimeSeries thetaTimeSeries = new TimeSeries();      // Theta (varianza di lungo periodo)
-        TimeSeries kappaTimeSeries = new TimeSeries();      // Kappa (velocità di mean reversion)
-        TimeSeries xiTimeSeries = new TimeSeries();         // Xi (volatilità della volatilità)
-        TimeSeries rhoTimeSeries = new TimeSeries();        // Rho (correlazione spot-vol)
-        TimeSeries rmseTimeSeries = new TimeSeries();       // RMSE (errore di calibrazione)
+        // Initialization of TimeSeries to track the evolution of each parameter
+        TimeSeries volatilityTimeSeries = new TimeSeries(); // Sigma (spot volatility)
+        TimeSeries thetaTimeSeries = new TimeSeries();      // Theta (long-run variance)
+        TimeSeries kappaTimeSeries = new TimeSeries();      // Kappa (mean reversion speed)
+        TimeSeries xiTimeSeries = new TimeSeries();         // Xi (volatility of volatility)
+        TimeSeries rhoTimeSeries = new TimeSeries();        // Rho (spot-vol correlation)
+        TimeSeries rmseTimeSeries = new TimeSeries();       // RMSE (calibration error)
 
         /*
-         * Parametri iniziali (Initial Guess) per il primo giorno di calibrazione.
-         * L'ordine nell'array è fondamentale per l'ottimizzatore:
+         * Initial Parameters (Initial Guess) for the first calibration day.
+         * The order in the array is critical for the optimizer:
          * [0]: volatility (sqrt(V0))
          * [1]: theta
          * [2]: kappa
@@ -80,54 +88,54 @@ public class Exercise1 {
                 -0.4
         };
 
-        // Istanza della classe helper che incapsula la logica di Finmath
+        // Helper class instance encapsulating Finmath logic
         HestonCalibrationClass calibrator = new HestonCalibrationClass();
 
         /*
-         * Definizione finestra temporale di analisi.
-         * È consigliabile limitare il periodo per gestire i tempi di calcolo.
+         * Analysis time window definition.
+         * It is advisable to limit the period to manage computation times.
          */
         LocalDate startDate = LocalDate.of(2010, 3, 1);
         LocalDate limit = LocalDate.of(2010, 4, 15);
 
-        System.out.println("Inizio calibrazione dal " + startDate + " al " + limit);
+        System.out.println("Starting calibration from " + startDate + " to " + limit);
         System.out.println("-----------------------------------------------------------------------------------------------------------------------------------");
-        // Header della tabella di output per il monitoraggio in console
+        // Output table header for console monitoring
         System.out.printf("%-12s | %-10s | %-10s | %-10s | %-10s | %-10s | %-10s | %-6s | %-8s%n",
-                "Data", "RMSE", "Vol", "Theta", "Kappa", "Xi", "Rho", "Iter", "Time(s)");
+                "Date", "RMSE", "Vol", "Theta", "Kappa", "Xi", "Rho", "Iter", "Time(s)");
         System.out.println("-----------------------------------------------------------------------------------------------------------------------------------");
 
         // =======================================================================
-        // 3. LOOP DI CALIBRAZIONE GIORNALIERA
+        // 3. DAILY CALIBRATION LOOP
         // =======================================================================
         for(LocalDate today : keys) {
 
-            // Skip delle date fuori dalla finestra temporale selezionata
+            // Skip dates outside the selected time window
             if(today.isBefore(startDate)) continue;
             if(today.isAfter(limit)) break;
 
-            // Recupero la superficie di volatilità specifica per il giorno corrente
+            // Retrieve the specific volatility surface for the current day
             OptionSurfaceData todaysMarket = marketData.get(today);
 
             try {
-                // Timer per monitorare le performance di calibrazione
+                // Timer to monitor calibration performance
                 long startMillis = System.currentTimeMillis();
 
                 /*
-                 * --- CHIAMATA CORE ALLA CALIBRAZIONE ---
-                 * Passiamo 'currentParameters' che contiene i risultati del giorno precedente (t-1).
-                 * Questo implementa la logica sequenziale (Bootstrapping dei parametri).
+                 * --- CORE CALL TO CALIBRATION ---
+                 * We pass 'currentParameters' which contains the results of the previous day (t-1).
+                 * This implements the sequential logic (Parameter Bootstrapping).
                  */
                 OptimizationResult result = calibrator.calibrate(today, todaysMarket, currentParameters);
 
                 long endMillis = System.currentTimeMillis();
                 double calculationTime = ((endMillis - startMillis) / 1000.0);
 
-                // --- ESTRAZIONE RISULTATI ---
+                // --- EXTRACT RESULTS ---
                 double rmse = result.getRootMeanSquaredError();
                 int iterations = result.getIterations();
 
-                // Estrazione dei parametri calibrati dal descrittore del modello Heston
+                // Extract calibrated parameters from the Heston model descriptor
                 HestonModelDescriptor calibratedDescriptor = (HestonModelDescriptor) result.getModel().getModelDescriptor();
 
                 double calibVol = calibratedDescriptor.getVolatility();
@@ -136,18 +144,18 @@ public class Exercise1 {
                 double calibXi = calibratedDescriptor.getXi();
                 double calibRho = calibratedDescriptor.getRho();
 
-                // --- OUTPUT E AGGIORNAMENTO DATI ---
+                // --- OUTPUT AND DATA UPDATE ---
 
                 if (Double.isFinite(rmse)) {
-                    // Stampa formattata dei risultati
+                    // Formatted output of results
                     System.out.printf("%-12s | %-10.6f | %-10.4f | %-10.4f | %-10.4f | %-10.4f | %-10.4f | %-6d | %-8.3f%n",
                             today, rmse, calibVol, calibTheta, calibKappa, calibXi, calibRho, iterations, calculationTime);
 
                     /*
-                     * AGGIORNAMENTO SEQUENZIALE (CRUCIALE):
-                     * Sovrascriviamo 'currentParameters' con i valori appena trovati.
-                     * Nella prossima iterazione, l'ottimizzatore partirà da questi valori,
-                     * aumentando la probabilità di convergenza rapida e stabilità.
+                     * SEQUENTIAL UPDATE (CRITICAL):
+                     * We overwrite 'currentParameters' with the values just found.
+                     * In the next iteration, the optimizer will start from these values,
+                     * increasing the probability of rapid convergence and stability.
                      */
                     currentParameters[0] = calibVol;
                     currentParameters[1] = calibTheta;
@@ -155,7 +163,7 @@ public class Exercise1 {
                     currentParameters[3] = calibXi;
                     currentParameters[4] = calibRho;
 
-                    // Salvataggio nelle strutture per il plotting
+                    // Save to structures for plotting
                     volatilityTimeSeries.add(today, calibVol);
                     thetaTimeSeries.add(today, calibTheta);
                     kappaTimeSeries.add(today, calibKappa);
@@ -163,11 +171,11 @@ public class Exercise1 {
                     rhoTimeSeries.add(today, calibRho);
                     rmseTimeSeries.add(today, rmse);
                 } else {
-                    // Gestione robusta dei fallimenti numerici (RMSE infinito o NaN)
+                    // Robust handling of numerical failures (Infinite RMSE or NaN)
                     System.out.printf("%-12s | FAILED (RMSE: %s) | Iter: %d | Time: %.3fs%n",
                             today, rmse, iterations, calculationTime);
 
-                    // Inserimento di NaN per indicare un buco nei dati (evita linee errate nei grafici)
+                    // Insert NaN to indicate a data gap (avoids incorrect lines in charts)
                     volatilityTimeSeries.add(today, Double.NaN);
                     thetaTimeSeries.add(today, Double.NaN);
                     kappaTimeSeries.add(today, Double.NaN);
@@ -177,18 +185,18 @@ public class Exercise1 {
                 }
 
             } catch (Exception e) {
-                // Catch generico per non interrompere l'intero loop se un solo giorno fallisce
-                System.err.println("Errore critico durante la calibrazione del " + today + ": " + e.getMessage());
+                // Generic catch to not interrupt the entire loop if a single day fails
+                System.err.println("Critical error during calibration on " + today + ": " + e.getMessage());
             }
         }
 
         // =======================================================================
-        // 4. GENERAZIONE GRAFICI
+        // 4. CHART GENERATION
         // =======================================================================
-        System.out.println("Generazione grafici in corso...");
+        System.out.println("Generating charts...");
         try {
             if(rmseTimeSeries.size() > 0) {
-                // Visualizzazione dei grafici tramite JFreeChart (incapsulato in TimeSeries)
+                // Visualization of charts via JFreeChart (encapsulated in TimeSeries)
                 rmseTimeSeries.plot("Calibration Error (RMSE)");
                 volatilityTimeSeries.plot("Parameter: Initial Volatility (sigma)");
                 thetaTimeSeries.plot("Parameter: Theta (Long Run Variance)");
@@ -196,10 +204,10 @@ public class Exercise1 {
                 xiTimeSeries.plot("Parameter: Xi (Vol of Vol)");
                 rhoTimeSeries.plot("Parameter: Rho (Correlation)");
             } else {
-                System.out.println("Nessun dato valido raccolto per generare i grafici.");
+                System.out.println("No valid data collected to generate charts.");
             }
         } catch (Exception e) {
-            System.out.println("Errore durante il plotting: " + e.getMessage());
+            System.out.println("Error during plotting: " + e.getMessage());
         }
     }
 }
