@@ -10,8 +10,8 @@ import net.finmath.integration.TrapezoidalRealIntegrator;
 /**
  * Implementation of the <b>Carr-Madan Static Replication</b> formula for generic payoffs.
  * <p>
- * This utility class allows pricing any derivative with a twice-differentiable payoff function \( g(S_T) \)
- * by replicating it using a portfolio of Vanilla Options (Calls and Puts).
+ * This utility class allows pricing any derivative with a twice-differentiable payoff function g(S_T)
+ * by replicating it using a portfolio of  Options (Calls and Puts).
  * </p>
  * <p>
  * Where:
@@ -29,10 +29,10 @@ import net.finmath.integration.TrapezoidalRealIntegrator;
  */
 public class CarrMadanGenericIntegrator {
 
-    /** The pricing model used to value the vanilla options (e.g., Heston Model). */
+    /** The pricing model used to value the  options (e.g., Heston Model). */
     private final HestonModel model;
 
-    /** The time to maturity \( T \) of the derivative. */
+    /** The  maturity \( T \) of the derivative. */
     private final double maturity;
 
     /** The forward price \( F(0, T) \) of the underlying asset. */
@@ -48,16 +48,16 @@ public class CarrMadanGenericIntegrator {
      * Constructor for the static replication engine.
      *
      * @param model
-     * The financial model used to calculate the prices of the vanilla options (Calls/Puts)
+     * The financial model used to calculate the prices of the  options (Calls/Puts)
      * required for the integral.
      * @param maturity
-     * The maturity date \( T \) (in years) of the claim.
+     * The maturity date T (in years) of the claim.
      * @param forwardPrice
-     * The Forward price \( F \) used as the split point for the integral (Puts for \( K < F \), Calls for \( K > F \)).
+     * The Forward price F used as the split point for the integral (Puts for K < F, Calls for K > F ).
      * @param discountFactor
-     * The discount factor to present value the cash flows.
+     * The discount factor
      * @param numberOfPoints
-     * Accuracy of the numerical integration (e.g., 500 or 1000).
+     * Accuracy of the numerical integration .
      */
     public CarrMadanGenericIntegrator(HestonModel model, double maturity, double forwardPrice, double discountFactor, int numberOfPoints) {
         this.model = model;
@@ -73,18 +73,16 @@ public class CarrMadanGenericIntegrator {
      * This method performs the numerical integration of the weighted option prices.
      * It splits the domain into two parts:
      * <ul>
-     * <li><b>Put Integral:</b> From near-zero to Forward \( F \).</li>
-     * <li><b>Call Integral:</b> From Forward \( F \) to a sufficiently high boundary.</li>
+     * <li><b>Put Integral:</b> From near-zero to Forward F .</li>
+     * <li><b>Call Integral:</b> From Forward  F to a sufficiently high boundary.</li>
      * </ul>
      * </p>
      *
      * @param payoffSecondDerivative
-     * A {@link DoubleUnaryOperator} representing \( g''(K) \).
+     * A {@link DoubleUnaryOperator} representing g''(K).
      * <br>Examples:
      * <ul>
-     * <li>Variance Swap: \( K \to \frac{2}{K^2} \) (or \( 1/K^2 \) depending on convention)</li>
-     * <li>Gamma Swap: \( K \to \frac{1}{K} \)</li>
-     * <li>Entropy Swap: \( K \to \frac{1}{K \ln(K)} \)</li>
+     * <li>Variance Swap:  1/K^2 </li>
      * </ul>
      *
      * @return The Present Value (PV) of the replication leg.
@@ -107,15 +105,16 @@ public class CarrMadanGenericIntegrator {
 
                 return weight * callPrice;
             } catch (CalculationException e) {
-                return 0.0;
+                e.printStackTrace();
             }
+            return 0.0;
         };
 
         // --------------------------------------------------------------------
         // 2. DEFINE PUT INTEGRAND (for Strike K < Forward)
         // Integrand = g''(K) * PricePut(K)
-        // Note: We use Put-Call Parity to compute Put prices if the model only provides Calls,
-        // or directly if supported. Here: Put = Call - (F - K)*DF
+        // Note: We use Put-Call Parity to compute Put.
+        // Here: Put = Call - (F - K)*DF
         // --------------------------------------------------------------------
         DoubleUnaryOperator integrandPut = strike -> {
             try {
@@ -133,11 +132,12 @@ public class CarrMadanGenericIntegrator {
 
                 return weight * putPrice;
             } catch (CalculationException e) {
-                return 0.0;
+                e.printStackTrace();
             }
+                return 0.0;
         };
 
-        // --------------------------------------------------------------------
+ ;       // --------------------------------------------------------------------
         // 3. EXECUTE INTEGRATION (Numerical Quadrature)
         // --------------------------------------------------------------------
 

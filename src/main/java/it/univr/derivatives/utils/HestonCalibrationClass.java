@@ -18,13 +18,12 @@ import net.finmath.optimizer.SolverException;
 /**
  * Utility class for Heston Model Calibration.
  * <p>
- * This class acts as a wrapper to configure and execute the optimization of stochastic
- * volatility parameters using the <i>finmath-lib</i> library.
+ * This class implement the HestonModel calibration using the <i>finmath-lib</i> library.
  * </p>
  * <p>
  * The process relies on minimizing the Root Mean Squared Error (RMSE) between:
  * <ul>
- * <li>Market prices (or implied volatilities) provided by {@link OptionSurfaceData}.</li>
+ * <li>implied volatilities provided by {@link OptionSurfaceData}.</li>
  * <li>Theoretical prices calculated via the Carr-Madan FFT method.</li>
  * </ul>
  * </p>
@@ -83,11 +82,6 @@ public class HestonCalibrationClass {
             new ScalarParameterInformationImplementation(true, new BoundConstraint(-1.0, 1.0));
 
 
-    /**
-     * Factory for creating the optimization algorithm.
-     * The Levenberg-Marquardt algorithm is used, which is particularly suitable
-     * for non-linear least squares problems.
-     */
     private final OptimizerFactory optimizerFactory;
 
     /**
@@ -159,7 +153,7 @@ public class HestonCalibrationClass {
                 kappaInfo,
                 xiInfo,
                 rhoInfo,
-                false // applyParameterConstraintsToInitialParameter: false allows the guess to slightly violate initial bounds
+                false // applyParameterConstraintsToInitialParameter: false allows the guess to slightly violate the Feller condition
         );
 
         // 4. Configure FFT Pricer (Carr-Madan)

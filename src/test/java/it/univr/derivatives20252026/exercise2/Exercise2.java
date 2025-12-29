@@ -26,18 +26,14 @@ import net.finmath.modelling.descriptor.HestonModelDescriptor;
  * <ol>
  * <li>
  * <b>Method A (Analytical):</b> Uses the closed-form solution for the expected average variance in the Heston model.
- * <br>Formula: \( E[V]_{0,T} = \theta + (V_0 - \theta) \frac{1 - e^{-\kappa T}}{\kappa T} \)
  * </li>
  * <li>
- * <b>Method B (Static Replication):</b> Uses the Carr-Madan formula to replicate the payoff using a portfolio of OTM vanilla options.
- * <br>Concept: Any twice-differentiable payoff \( g(S_T) \) can be replicated by a continuum of options.
- * <br>For Variance Swaps, the payoff function is related to \( \ln(S_T) \), implying a weighting function \( g''(K) = \frac{2}{K^2} \).
- * </li>
- * </ol>
+ * <b>Method B (Static Replication):</b> Uses the Carr-Madan formula to replicate the payoff using a portfolio of OTM  options.
+ * <br>Concept: Any twice-differentiable payoff  g(S_T)  can be replicated by a continuum of options.
+ * <br>For Variance Swaps, the payoff function is related to ln(S_T), implying a weighting function g''(K) = 1.0 / (k * k)).
  * </p>
  * <p>
- * The goal is to verify that the "Model-Free" replication price converges to the theoretical model price
- * when the options are priced using the model itself (Consistency Check).
+ * The aim is to compare the analytical formula with the static replication formula.
  * </p>
  *
  * @author Federico Alberighi
@@ -47,23 +43,18 @@ import net.finmath.modelling.descriptor.HestonModelDescriptor;
 public class Exercise2 {
 
     /**
-     * Main execution method for the Variance Swap Pricing exercise.
      * <p>The workflow is as follows:</p>
      * <ol>
      * <li><b>Calibration:</b> Calibrates the Heston model on real market data (Jan 2010) to get realistic parameters.</li>
-     * <li><b>Environment Setup:</b> Sets up a "Laboratory" pricing environment (Standard Spot=100, Rates=0) to isolate variance effects.</li>
+     * <li><b>Environment Setup:</b> Sets up a (fake) pricing environment (Standard Spot=100, Rates=0) to isolate variance effects.</li>
      * <li><b>Analytical Pricing:</b> Calculates the fair variance swap rate using the Heston specific formula.</li>
      * <li><b>Replication Pricing:</b> Calculates the fair rate by integrating weighted OTM option prices (Carr-Madan).</li>
      * <li><b>Comparison:</b> Checks if the difference between the two methods is negligible.</li>
      * </ol>
-     *
-     * @param args Command line arguments (not used).
-     * @throws Exception If errors occur during calibration or pricing.
      */
     public static void main(String[] args) throws Exception {
 
         System.out.println("--- EXERCISE 2: Variance Swap Pricing (Heston vs Replication) ---");
-        DecimalFormat df = new DecimalFormat("0.00000000");
 
         // =======================================================================
         // STEP 1: CALIBRATION (Real World Data)
@@ -91,14 +82,14 @@ public class Exercise2 {
 
         HestonModelDescriptor realParams = (HestonModelDescriptor) result.getModel().getModelDescriptor();
 
-        System.out.println("   Calibration RMSE: " + df.format(result.getRootMeanSquaredError()));
+        System.out.println("   Calibration RMSE: " + result.getRootMeanSquaredError());
         System.out.printf("   Parameters: Sigma=%.4f, Theta=%.4f, Kappa=%.4f, Xi=%.4f, Rho=%.4f%n",
                 realParams.getVolatility(), realParams.getTheta(), realParams.getKappa(), realParams.getXi(), realParams.getRho());
 
 
         // =======================================================================
-        // STEP 2: PRICING ENVIRONMENT SETUP (Laboratory World: S=100, r=0)
-        // We use r=0 and q=0 to simplify the variance swap valuation.
+        // STEP 2: PRICING ENVIRONMENT SETUP (Fake World: S=100, r=0)
+        // We use r=0 q = 0 to simplify the variance swap valuation.
         // =======================================================================
         System.out.println("\n2. Pricing environment configuration (S=100, r=0)...");
 
@@ -171,12 +162,12 @@ public class Exercise2 {
         // RESULTS COMPARISON
         // =======================================================================
         System.out.println("\n--- COMPARISON RESULTS ---");
-        System.out.println("Maturity:   " + df.format(maturity));
-        System.out.println("Analytical: " + df.format(fairVarSwapRate));
-        System.out.println("Replication:" + df.format(varianceSwapRateReplication));
+        System.out.println("Maturity:   " + maturity);
+        System.out.println("Analytical: " + fairVarSwapRate);
+        System.out.println("Replication:" + varianceSwapRateReplication);
 
         double diff = Math.abs(fairVarSwapRate - varianceSwapRateReplication);
-        System.out.println("Difference: " + df.format(diff));
+        System.out.println("Difference: " + diff);
 
         if(diff < 1E-4) {
             System.out.println(">> SUCCESS: Results are consistent.");

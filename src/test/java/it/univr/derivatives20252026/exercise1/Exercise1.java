@@ -22,10 +22,9 @@ import net.finmath.modelling.descriptor.HestonModelDescriptor;
  * evolve over time to adapt to new market volatility surfaces.
  * </p>
  * <p>
- * The class uses a <b>Sequential Approach (Bootstrapping)</b>: the optimal parameters
+ * The class uses a <b>Bootstrapping the parameters </b>: the optimal parameters
  * calibrated at day <i>t</i> are used as the <i>Initial Guess</i> for the calibration
- * at day <i>t+1</i>. This ensures greater continuity and reduces the risk of the optimizer
- * falling into distant local minima between consecutive days.
+ * at day <i>t+1</i>.
  * </p>
  *
  * @author Federico Alberighi
@@ -35,18 +34,14 @@ import net.finmath.modelling.descriptor.HestonModelDescriptor;
 public class Exercise1 {
 
     /**
-     * Application entry point.
      * <p>The workflow is as follows:</p>
      * <ol>
      * <li>Loading historical volatility surfaces (from Excel/CSV).</li>
      * <li>Initialization of TimeSeries to store the results.</li>
      * <li>Definition of starting parameters (Initial Guess).</li>
-     * <li>Execution of the daily calibration loop (with sequential update).</li>
+     * <li>Execution of the daily calibration loop (with daily update).</li>
      * <li>Generation of final plots.</li>
      * </ol>
-     *
-     * @param args Command line arguments (not used in this exercise).
-     * @throws Exception If errors occur during data loading or optimization.
      */
     public static void main(String[] args) throws Exception {
 
@@ -88,7 +83,6 @@ public class Exercise1 {
                 -0.4
         };
 
-        // Helper class instance encapsulating Finmath logic
         HestonCalibrationClass calibrator = new HestonCalibrationClass();
 
         /*
@@ -152,10 +146,9 @@ public class Exercise1 {
                             today, rmse, calibVol, calibTheta, calibKappa, calibXi, calibRho, iterations, calculationTime);
 
                     /*
-                     * SEQUENTIAL UPDATE (CRITICAL):
+                     * Daily UPDATE :
                      * We overwrite 'currentParameters' with the values just found.
-                     * In the next iteration, the optimizer will start from these values,
-                     * increasing the probability of rapid convergence and stability.
+                     * In the next iteration, the optimizer will start from these values.
                      */
                     currentParameters[0] = calibVol;
                     currentParameters[1] = calibTheta;
@@ -194,7 +187,6 @@ public class Exercise1 {
         // 4. CHART GENERATION
         // =======================================================================
         System.out.println("Generating charts...");
-        try {
             if(rmseTimeSeries.size() > 0) {
                 // Visualization of charts via JFreeChart (encapsulated in TimeSeries)
                 rmseTimeSeries.plot("Calibration Error (RMSE)");
@@ -205,9 +197,6 @@ public class Exercise1 {
                 rhoTimeSeries.plot("Parameter: Rho (Correlation)");
             } else {
                 System.out.println("No valid data collected to generate charts.");
-            }
-        } catch (Exception e) {
-            System.out.println("Error during plotting: " + e.getMessage());
         }
     }
 }
