@@ -68,7 +68,6 @@ public class Exercise1 {
 
         /*
          * Initial Parameters (Initial Guess) for the first calibration day.
-         * The order in the array is critical for the optimizer:
          * [0]: volatility (sqrt(V0))
          * [1]: theta
          * [2]: kappa

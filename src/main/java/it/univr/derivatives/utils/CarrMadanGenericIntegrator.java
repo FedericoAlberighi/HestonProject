@@ -32,13 +32,13 @@ public class CarrMadanGenericIntegrator {
     /** The pricing model used to value the  options (e.g., Heston Model). */
     private final HestonModel model;
 
-    /** The  maturity \( T \) of the derivative. */
+    /** The  maturity  T of the derivative. */
     private final double maturity;
 
-    /** The forward price \( F(0, T) \) of the underlying asset. */
+    /** The forward price  F(0, T) of the underlying asset. */
     private final double forwardPrice;
 
-    /** The discount factor \( DF(0, T) \) for the corresponding maturity. */
+    /** The discount factor  DF(0, T)  for the corresponding maturity. */
     private final double discountFactor;
 
     /** The number of integration points used for the numerical quadrature (Trapezoidal rule). */
