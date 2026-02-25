@@ -94,8 +94,7 @@ public class HestonCalibrationClass {
      * </ul>
      * </p>
      */
-    public HestonCalibrationClass() {
-        this.optimizerFactory = new OptimizerFactoryLevenbergMarquardt(300, 2);
+    public HestonCalibrationClass() {this.optimizerFactory = new OptimizerFactoryLevenbergMarquardt(300, 2);
     }
 
     /**
