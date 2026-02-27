@@ -31,7 +31,7 @@ import net.finmath.modelling.descriptor.HestonModelDescriptor;
  * @author Alice Bonizzoni
  * @version 1.1
  */
-public class Exercise1 {
+public class HistoricalRecalibration {
 
     /**
      * <p>The workflow is as follows:</p>

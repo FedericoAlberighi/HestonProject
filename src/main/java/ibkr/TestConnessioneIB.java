@@ -5,11 +5,28 @@ import com.ib.client.EJavaSignal;
 import com.ib.client.EReader;
 import com.ib.client.EReaderSignal;
 
+import java.util.Set;
+
 public class TestConnessioneIB {
 
     public static void main(String[] args) throws InterruptedException {
         // 1. Inizializza chi riceve (il Wrapper) e i Segnali
-        IBWrapperImpl wrapper = new IBWrapperImpl();
+        IBWrapperImpl wrapper = new IBWrapperImpl() {
+            @Override
+            public void error(int id, int errorCode, String errorMsg) {
+
+            }
+
+            @Override
+            public void securityDefinitionOptionParameter(int reqId, String exchange, int underlyingConId, String tradingClass, String multiplier, Set<String> expirations, Set<Double> strikes) {
+
+            }
+
+            @Override
+            public void securityDefinitionOptionParameterEnd(int reqId) {
+
+            }
+        };
         EReaderSignal signal = new EJavaSignal();
 
         // 2. Inizializza chi invia (il ClientSocket)

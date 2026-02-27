@@ -1,17 +1,13 @@
 package it.univr.derivatives20252026.exercise2;
 
-import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.function.DoubleUnaryOperator;
 
 import it.univr.derivatives.marketdataprovider.MarketDataProvider;
 import it.univr.derivatives.utils.CarrMadanGenericIntegrator;
 import it.univr.derivatives.utils.HestonCalibrationClass;
-import net.finmath.exception.CalculationException;
 import net.finmath.fouriermethod.calibration.CalibratedModel.OptimizationResult;
 import net.finmath.fouriermethod.models.HestonModel;
-import net.finmath.fouriermethod.products.EuropeanOption;
-import net.finmath.integration.TrapezoidalRealIntegrator;
 import net.finmath.marketdata.model.volatilities.OptionSurfaceData;
 import net.finmath.modelling.descriptor.HestonModelDescriptor;
 
@@ -40,7 +36,7 @@ import net.finmath.modelling.descriptor.HestonModelDescriptor;
  * @author Alice Bonizzoni
  * @version 1.1
  */
-public class Exercise2 {
+public class VarianceSwap {
 
     /**
      * <p>The workflow is as follows:</p>

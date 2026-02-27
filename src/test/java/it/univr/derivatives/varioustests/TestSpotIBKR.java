@@ -35,7 +35,7 @@ public class TestSpotIBKR {
         try {
             String simbolo = "AAPL";
             // Scarichiamo 1 anno ("1 Y") di dati giornalieri
-            TimeSeries storico = IBKRMarketDataProvider.getHistoricalData("AAPL", "STK", "SMART", "USD", "1 Y");            System.out.println("====================================");
+            TimeSeries storico = IBKRMarketDataProvider.getHistoricalData("PYPL", "STK", "SMART", "USD", "1 Y");            System.out.println("====================================");
             if (storico != null && storico.size() > 0) {
                 System.out.println("SUCCESSO! Ho scaricato " + storico.size() + " giorni di contrattazione.");
 

@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 // ... (l'IDE aggiungerà qui gli altri import necessari di com.ib.client)
 
-public class IBWrapperImpl implements EWrapper {
+public abstract class IBWrapperImpl implements EWrapper {
 
     // --- Questi sono i metodi che ci interessano per il test ---
 
@@ -79,8 +79,7 @@ public class IBWrapperImpl implements EWrapper {
 
     @Override
     public void nextValidId(int orderId) {
-        System.out.println("\n>>> CONNESSIONE ALLA TWS RIUSCITA! <<<");
-        System.out.println("Il prossimo Order ID valido è: " + orderId + "\n");
+
     }
 
     @Override
@@ -238,6 +237,8 @@ public class IBWrapperImpl implements EWrapper {
 
     }
 
+    public abstract void error(int id, int errorCode, String errorMsg);
+
     @Override
     public void error(Exception e) {
         e.printStackTrace();
@@ -261,7 +262,7 @@ public class IBWrapperImpl implements EWrapper {
 
     @Override
     public void connectionClosed() {
-        System.out.println("Connessione chiusa.");
+        ;
     }
 
     @Override
@@ -504,4 +505,7 @@ public class IBWrapperImpl implements EWrapper {
 
     }
 
+    public abstract void securityDefinitionOptionParameter(int reqId, String exchange, int underlyingConId, String tradingClass, String multiplier, Set<String> expirations, Set<Double> strikes);
+
+    public abstract void securityDefinitionOptionParameterEnd(int reqId);
 }
