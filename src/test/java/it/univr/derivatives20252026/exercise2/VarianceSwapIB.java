@@ -20,9 +20,9 @@ public class VarianceSwapIB {
         System.out.println("\n1. Collegamento a IBKR e scaricamento superficie live...");
 
         // Usiamo Apple (AAPL) come esempio, ma potresti passare questi parametri come input
-        String symbol = "AAPL";
-        String secType = "STK";
-        String exchange = "SMART";
+        String symbol = "SPX";
+        String secType = "IND";
+        String exchange = "CBOE";
         String currency = "USD";
 
         // CHIAMATA AL TUO NUOVO MARKET DATA PROVIDER
@@ -61,9 +61,12 @@ public class VarianceSwapIB {
         System.out.println("\n3. Configurazione ambiente di pricing (Spot=100 per normalizzazione)...");
 
         double initialSpot = 100; // Usiamo 100 per rendere il prezzo del VarSwap una percentuale leggibile
-        double riskFreeRate = 0.03; // Assumiamo un tasso privo di rischio del 3%
-        double maturity = 30 / 365.0; // 1 mese
-
+        double riskFreeRate = 0;
+        // Assumiamo un tasso privo di rischio del 3%
+        double[] availableMaturities = marketData.getMaturities();
+        double maturity = availableMaturities[0]; // prima scadenza disponibile (~31/365)
+        System.out.printf("Scadenza reale usata: %.4f anni (%.0f giorni)%n",
+                maturity, maturity * 365);
         double forwardPrice = initialSpot * Math.exp(riskFreeRate * maturity);
         double discountFactor = Math.exp(-riskFreeRate * maturity);
 

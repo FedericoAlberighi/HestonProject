@@ -14,10 +14,10 @@ public class TestSpotIBKR {
         System.out.println("Richiesta prezzo in tempo reale a Interactive Brokers in corso...");
 
         try {
-            double spotDax = IBKRMarketDataProvider.getRealTimeSpotPrice("ISP", "STK", "SMART", "EUR");
+            double spotDax = IBKRMarketDataProvider.getRealTimeSpotPrice("NVDA", "STK", "SMART", "USD");
             System.out.println("====================================");
             if (spotDax > 0) {
-                System.out.println("IL PREZZO SPOT DI ISP È: " + spotDax);
+                System.out.println("IL PREZZO SPOT DI  È: " + spotDax);
             } else {
                 System.out.println("ATTENZIONE: Nessun prezzo ricevuto (Mercato chiuso o permessi mancanti?).");
             }
@@ -35,7 +35,7 @@ public class TestSpotIBKR {
         try {
             String simbolo = "AAPL";
             // Scarichiamo 1 anno ("1 Y") di dati giornalieri
-            TimeSeries storico = IBKRMarketDataProvider.getHistoricalData("PYPL", "STK", "SMART", "USD", "1 Y");            System.out.println("====================================");
+            TimeSeries storico = IBKRMarketDataProvider.getHistoricalData("NVDA", "STK", "SMART", "USD", "1 Y");            System.out.println("====================================");
             if (storico != null && storico.size() > 0) {
                 System.out.println("SUCCESSO! Ho scaricato " + storico.size() + " giorni di contrattazione.");
 

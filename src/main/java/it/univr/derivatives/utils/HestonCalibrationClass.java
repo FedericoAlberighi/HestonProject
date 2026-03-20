@@ -53,7 +53,7 @@ public class HestonCalibrationClass {
      * <br>Allowed range: [0.01 - 0.20]
      */
     private static final ScalarParameterInformationImplementation thetaInfo =
-            new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 0.2));
+            new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 0.6));
 
     /**
      * Constraint for parameter <b>Kappa</b> (Mean Reversion Speed).
@@ -70,7 +70,7 @@ public class HestonCalibrationClass {
      * <br>Allowed range: [0.01 - 2.0]
      */
     private static final ScalarParameterInformationImplementation xiInfo =
-            new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 2.0));
+            new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 1.5));
 
     /**
      * Constraint for parameter <b>Rho</b> (Correlation).
@@ -79,7 +79,7 @@ public class HestonCalibrationClass {
      * <p>Note: For equity markets, negative values are generally expected (leverage effect).</p>
      */
     private static final ScalarParameterInformationImplementation rhoInfo =
-            new ScalarParameterInformationImplementation(true, new BoundConstraint(-1.0, 1.0));
+            new ScalarParameterInformationImplementation(true, new BoundConstraint(-2.0, 1.0));
 
 
     private final OptimizerFactory optimizerFactory;
