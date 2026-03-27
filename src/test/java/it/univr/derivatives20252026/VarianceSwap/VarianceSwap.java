@@ -1,4 +1,4 @@
-package it.univr.derivatives20252026.exercise2;
+package it.univr.derivatives20252026.VarianceSwap;
 
 import java.time.LocalDate;
 import java.util.function.DoubleUnaryOperator;

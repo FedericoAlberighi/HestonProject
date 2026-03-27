@@ -79,7 +79,7 @@ public class HestonCalibrationClass {
      * <p>Note: For equity markets, negative values are generally expected (leverage effect).</p>
      */
     private static final ScalarParameterInformationImplementation rhoInfo =
-            new ScalarParameterInformationImplementation(true, new BoundConstraint(-2.0, 1.0));
+            new ScalarParameterInformationImplementation(true, new BoundConstraint(-1.0, 1.0));
 
 
     private final OptimizerFactory optimizerFactory;

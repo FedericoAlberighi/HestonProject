@@ -11,7 +11,7 @@ public class TestSuperficieIBKR {
 
             // Chiediamo la superficie di Apple (AAPL)
             // Usiamo AAPL perché con i conti Paper Trading gratuiti le opzioni americane funzionano sempre
-            OptionSurfaceData surface = IBKRMarketDataProvider.getLiveVolatilitySurface("SPY", "STK", "SMART", "USD");
+            OptionSurfaceData surface = IBKRMarketDataProvider.getLiveVolatilitySurface("SPX", "IND", "CBOE", "USD");
 
             System.out.println("\n====================================");
             if (surface != null) {

@@ -1,4 +1,4 @@
-package it.univr.derivatives20252026.exercise1;
+package it.univr.derivatives20252026.Recalibration;
 
 import java.time.LocalDate;
 import java.util.Set;
