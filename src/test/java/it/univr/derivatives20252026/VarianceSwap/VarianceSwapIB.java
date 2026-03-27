@@ -28,7 +28,7 @@ public class VarianceSwapIB {
         // Zero rates della curva SOFR/Treasury per le 7 scadenze target:
         // 30gg, 60gg, 90gg, 180gg, 1y, 1.5y, 2y
         // Aggiornare con i valori di mercato correnti (es. da Bloomberg, FRED, IBKR).
-//https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve&field_tdr_date_value=202603
+        //https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve&field_tdr_date_value=202603
         double[] zeroRates = {
                 0.0373,  // 30gg  — 1 mese
                 0.0372,  // 60gg  — 2 mesi (interpolato)
@@ -39,9 +39,6 @@ public class VarianceSwapIB {
                 0.0379   // 730gg — 2 anni
         };
 
-        // Tasso usato per la superficie — passato a buildFinmathSurface
-        // Non usato nel pricing del variance swap (r=0 per semplicità)
-        // double riskFreeRate30d = zeroRates[0];
 
         // =======================================================================
         // STEP 1: SCARICO SUPERFICIE LIVE DA IBKR
@@ -79,9 +76,6 @@ public class VarianceSwapIB {
         // =======================================================================
         // STEP 3: SETUP AMBIENTE DI PRICING
         // r=0, q=0 — "fake world" identico alla classe VarianceSwap su dati storici.
-        // Giustificazione: a T=30gg il discount factor con r=5% vale ~0.9957,
-        // impatto sul fair strike < 0.5bp — trascurabile rispetto all'errore del modello.
-        // Con r=0: forward=spot=100, DF=1 → formula di replica si semplifica.
         // =======================================================================
         System.out.println("\n3. Configurazione ambiente di pricing (Spot=100, r=0)...");
 
@@ -107,7 +101,6 @@ public class VarianceSwapIB {
 
         // =======================================================================
         // STEP 4: METODO A — FORMULA ANALITICA HESTON
-        // E^Q[∫₀ᵀ v_t dt] = θ·T + (v₀ - θ)·(1 - e^{-κT}) / κ
         // =======================================================================
         double v0     = p.getVolatility() * p.getVolatility();
         double theta  = p.getTheta();
@@ -118,7 +111,6 @@ public class VarianceSwapIB {
 
         // =======================================================================
         // STEP 5: METODO B — REPLICA STATICA (Carr-Madan)
-        // K_var = (2/T) ∫ [C(K)/K² + P(K)/K²] dK
         // =======================================================================
         DoubleUnaryOperator kernel = k -> 1.0 / (k * k);
 

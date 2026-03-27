@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * <p><b>Internal architecture:</b></p>
  * <pre>
- *   IBKRMarketDataProvider  (this class — facade, ~60 lines)
+ *   IBKRMarketDataProvider  (this class — facade)
  *        │
  *        ├── IBKRConnection        — TCP connection to TWS, contract builder
  *        ├── SpotPriceFetcher      — spot price (1-min bar + daily fallback)
@@ -60,9 +60,15 @@ public class IBKRMarketDataProvider {
      * <br>{@code [30d, 60d, 90d, 180d, 1y, 1.5y, 2y]}
      * <p>Note: Update periodically to reflect current market rates.</p>
      */
-    private static final double[] DEFAULT_ZERO_RATES =
-            {0.053, 0.052, 0.051, 0.049, 0.045, 0.043, 0.042};
-
+    private static final double[] DEFAULT_ZERO_RATES ={
+            0.0373,  // 30gg  — 1 mese
+            0.0372,  // 60gg  — 2 mesi (interpolato)
+            0.0373,  // 90gg  — 3 mesi
+            0.0376,  // 180gg — 6 mesi
+            0.0373,  // 365gg — 1 anno
+            0.0376,  // 548gg — interpolato tra 1y e 2y
+            0.0379   // 730gg — 2 anni
+    };
     /**
      * Target strike multipliers relative to spot (ATM = 1.0).
      * <br>Calls: 1.10×, 1.05×, 1.025×, 1.0× — Puts: 0.975×, 0.95×, 0.90×.

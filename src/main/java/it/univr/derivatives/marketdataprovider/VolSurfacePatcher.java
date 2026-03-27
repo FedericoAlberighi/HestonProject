@@ -34,10 +34,7 @@ import java.util.List;
  */
 class VolSurfacePatcher {
 
-    /* ===========================================================================
-     * CONSTANTS
-     * ===========================================================================
-     */
+
 
     /**
      * Maximum number of NaN slots that may be patched in a single maturity row
