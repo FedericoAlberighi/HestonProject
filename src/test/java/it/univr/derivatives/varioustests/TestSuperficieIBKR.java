@@ -9,7 +9,6 @@ public class TestSuperficieIBKR {
         try {
             System.out.println("Avvio test Superficie di Volatilità LIVE...");
 
-            // Chiediamo la superficie di  (SPX)
             OptionSurfaceData surface = IBKRMarketDataProvider.getLiveVolatilitySurface("SPX", "IND", "CBOE", "USD");
 
             System.out.println("\n====================================");

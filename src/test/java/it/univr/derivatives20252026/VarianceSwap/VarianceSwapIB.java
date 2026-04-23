@@ -27,7 +27,7 @@ public class VarianceSwapIB {
 
         // Zero rates della curva SOFR/Treasury per le 7 scadenze target:
         // 30gg, 60gg, 90gg, 180gg, 1y, 1.5y, 2y
-        // Aggiornare con i valori di mercato correnti (es. da Bloomberg, FRED, IBKR).
+        // Aggiornare con i valori di mercato correnti (es. da Bloomberg, FRED).
         //https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve&field_tdr_date_value=202603
         double[] zeroRates = {
                 0.0373,  // 30gg  — 1 mese
@@ -132,7 +132,7 @@ public class VarianceSwapIB {
         if (Math.abs(fairVarSwapRate - varianceSwapReplication) < 1e-3)
             System.out.println(">> SUCCESSO: prezzi consistenti tra i due metodi.");
         else
-            System.out.println(">> NOTA: divergenza dovuta alla curvatura dello skew live.");
+            System.out.println(">> NOTA: Scarto troppo grande ");
 
         System.out.printf("%nFair strike (vol): %.2f%%%n", Math.sqrt(fairVarSwapRate) * 100);
     }

@@ -50,27 +50,27 @@ public class HestonCalibrationClass {
     /**
      * Constraint for parameter <b>Theta</b> (Long Run Variance).
      * <br>Represents the long-term mean level to which variance reverts.
-     * <br>Allowed range: [0.01 - 0.20]
+     * <br>Allowed range: [0.01 - 1.0]
      */
     private static final ScalarParameterInformationImplementation thetaInfo =
-            new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 0.6));
+            new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 1.0));
 
     /**
      * Constraint for parameter <b>Kappa</b> (Mean Reversion Speed).
      * <br>Determines the speed at which variance reverts to the Theta level.
-     * <br>Allowed range: [0.01 - 5.0].
+     * <br>Allowed range: [0.01 - 10.0].
      * <p>Note: A higher value implies a faster reversion to the mean.</p>
      */
     private static final ScalarParameterInformationImplementation kappaInfo =
-            new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 5.0));
+            new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 10.0));
 
     /**
      * Constraint for parameter <b>Xi</b> (Volatility of Volatility).
      * <br>Determines the "volatility" (standard deviation) of the stochastic variance process.
-     * <br>Allowed range: [0.01 - 2.0]
+     * <br>Allowed range: [0.01 - 5.0]
      */
     private static final ScalarParameterInformationImplementation xiInfo =
-            new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 1.5));
+            new ScalarParameterInformationImplementation(true, new BoundConstraint(0.01, 5.0));
 
     /**
      * Constraint for parameter <b>Rho</b> (Correlation).

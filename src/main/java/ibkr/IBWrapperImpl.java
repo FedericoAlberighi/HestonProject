@@ -6,11 +6,9 @@ import com.ib.client.protobuf.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-// ... (l'IDE aggiungerà qui gli altri import necessari di com.ib.client)
 
 public abstract class IBWrapperImpl implements EWrapper {
 
-    // --- Questi sono i metodi che ci interessano per il test ---
 
     @Override
     public void tickPrice(int tickerId, int field, double price, TickAttrib attrib) {
